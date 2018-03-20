@@ -1,4 +1,16 @@
+# Emacs
+*~
+
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
 deps/deps.jl
+deps/usr/
+deps/src/
+
+# Data files
+*.raw
+*.art
+
+# Mac OSX
+.DS_Store
