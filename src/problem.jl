@@ -42,4 +42,11 @@ function dealloc(prob::Problem)
     prob.ptr = C_NULL
 end
 
+b(prob::Problem) = Vector(ccall((:PROB_get_b, libpfnet), Ptr{Void}, (Ptr{Void},), prob.ptr), false)
+f(prob::Problem) = Vector(ccall((:PROB_get_f, libpfnet), Ptr{Void}, (Ptr{Void},), prob.ptr), false)
+l(prob::Problem) = Vector(ccall((:PROB_get_l, libpfnet), Ptr{Void}, (Ptr{Void},), prob.ptr), false)
+u(prob::Problem) = Vector(ccall((:PROB_get_u, libpfnet), Ptr{Void}, (Ptr{Void},), prob.ptr), false)
+
+G(prob::Problem) = SparseMatrixCSC(ccall((:PROB_get_G, libpfnet), Ptr{Void}, (Ptr{Void},), prob.ptr))
+
 show_problem(prob::Problem) = ccall((:PROB_show, libpfnet), Void, (Ptr{Void},), prob.ptr)
