@@ -8,11 +8,15 @@ else
 end
 
 # Vector
-function Vector(ptr::Ptr{Void}, own::Bool)
-    return unsafe_wrap(Array,
-                       ccall((:VEC_get_data, libpfnet), Ptr{Float64}, (Ptr{Void},), ptr),
-                       ccall((:VEC_get_size, libpfnet), Int, (Ptr{Void},), ptr),
+function Vector(vec::Ptr{Void}, own::Bool)
+    jvec = unsafe_wrap(Array,
+                       ccall((:VEC_get_data, libpfnet), Ptr{Float64}, (Ptr{Void},), vec),
+                       ccall((:VEC_get_size, libpfnet), Int, (Ptr{Void},), vec),
                        own)
+    if own
+        Base.Libc.free(vec) # delete container
+    end
+    return jvec
 end
 
 function pfnet_vec_from_Array{T}(ar::Array{T,1})
@@ -24,22 +28,25 @@ function pfnet_vec_from_Array{T}(ar::Array{T,1})
 end
 
 # SparseMatrixCSC
-function SparseMatrixCSC(ptr::Ptr{Void})
-    m = ccall((:MAT_get_size1, libpfnet), Int, (Ptr{Void},), ptr)
-    n = ccall((:MAT_get_size2, libpfnet), Int, (Ptr{Void},), ptr)
-    nnz = m = ccall((:MAT_get_nnz, libpfnet), Int, (Ptr{Void},), ptr)
+function SparseMatrixCSC(mat::Ptr{Void}, own::Bool)
+    m = ccall((:MAT_get_size1, libpfnet), Int, (Ptr{Void},), mat)
+    n = ccall((:MAT_get_size2, libpfnet), Int, (Ptr{Void},), mat)
+    nnz = m = ccall((:MAT_get_nnz, libpfnet), Int, (Ptr{Void},), mat)
     I = unsafe_wrap(Array,
-                    ccall((:MAT_get_row_array, libpfnet), Ptr{Int32}, (Ptr{Void},), ptr),
+                    ccall((:MAT_get_row_array, libpfnet), Ptr{Int32}, (Ptr{Void},), mat),
                     nnz,
-                    false)+1
+                    own)+1
     J = unsafe_wrap(Array,
-                    ccall((:MAT_get_col_array, libpfnet), Ptr{Int32}, (Ptr{Void},), ptr),
+                    ccall((:MAT_get_col_array, libpfnet), Ptr{Int32}, (Ptr{Void},), mat),
                     nnz,
-                    false)+1
+                    own)+1
     V = unsafe_wrap(Array,
-                    ccall((:MAT_get_data_array, libpfnet), Ptr{Float64}, (Ptr{Void},), ptr),
+                    ccall((:MAT_get_data_array, libpfnet), Ptr{Float64}, (Ptr{Void},), mat),
                     nnz,
-                    false)
+                    own)
+    if own
+        Base.Libc.free(mat) # delete container
+    end
     return sparse(I, J, V, m, n)
 end
 

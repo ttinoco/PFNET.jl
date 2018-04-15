@@ -58,8 +58,7 @@ add_constraint(problem, th_limits)
 analyze(problem)
 show_problem(problem)
 
-x = init_point(problem)
-pfnet.eval(problem, x)
+pfnet.eval(problem, x(problem))
 
 coeff = rand(size(f(problem))[1])
 combine_H(problem, coeff)
