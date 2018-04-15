@@ -1,4 +1,5 @@
 using pfnet
+using Ipopt
 
 # Case
 case = ARGS[1]
@@ -58,13 +59,7 @@ add_constraint(problem, th_limits)
 analyze(problem)
 show_problem(problem)
 
-pfnet.eval(problem, x(problem))
+# Solve
+solver = IpoptSolver()
+solve(problem, solver)
 
-coeff = rand(size(f(problem))[1])
-combine_H(problem, coeff)
-
-#println(f(problem))
-#println(H_combined(problem))
-#println(num_primal_variables(problem))
-#println(num_linear_equality_constraints(problem))
-#println(num_nonlinear_equality_constraints(problem))
