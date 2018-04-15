@@ -15,6 +15,14 @@ function Vector(ptr::Ptr{Void}, own::Bool)
                        own)
 end
 
+function pfnet_vec_from_Array{T}(ar::Array{T,1})
+    return ccall((:VEC_new_from_array, libpfnet),
+                 Ptr{Void},
+                 (Ptr{T}, Int,),
+                 Ref(ar, 1),
+                 size(ar)[1])
+end
+
 # SparseMatrixCSC
 function SparseMatrixCSC(ptr::Ptr{Void})
     m = ccall((:MAT_get_size1, libpfnet), Int, (Ptr{Void},), ptr)
