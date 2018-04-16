@@ -106,7 +106,7 @@ function solve(prob::Problem, solver::AbstractMathProgSolver)
     # 0 <= Ax-b <= 0
     # 0 <= f(x) - 0 <= 0
     # 0 <= Gx - s <= 0
-    # [-inf l] <= [x s] <= [inf u]
+    # [xmin l] <= [x s] <= [xmax u]
 
     numVar = nx + ns
     numConstr = ma+mf+mg
@@ -117,30 +117,15 @@ function solve(prob::Problem, solver::AbstractMathProgSolver)
     sense = :Min
     model = NonlinearModel(solver)
     evaluator = ProblemEvaluator(prob, nx, ns, ma, mf, mg)
-    y = [x(prob); rand(ns)]
+    y = [x(prob); zeros(ns)]
     
-    # Testing
-    """
-    println(nx)
-    println(ns)
-    initialize(evaluator, [:Jac])
-    println(features_available(evaluator))
-    println(eval_f(evaluator, y))
-    g = zeros(ma+mf+mg)
-    eval_g(evaluator, g, y)
-    g = zeros(nx+ns)
-    eval_grad_f(evaluator, g, y)
-    Ig, Jg = jac_structure(evaluator)
-    Ih, Jh = hesslag_structure(evaluator)
-    Jg = zeros(length(Ig))
-    Vg = eval_jac_g(evaluator, Jg, y)
-    Hh = zeros(length(Ih))
-    Vh = eval_hesslag(evaluator, Hh, y, 0.3, rand(numConstr))
-    """
-
     loadproblem!(model, numVar, numConstr, l, u, lb, ub, sense, evaluator)
     setwarmstart!(model, y)
-    optimize!(model)    
+    optimize!(model)
+
+    return (status(model),
+            getsolution(model)[1:nx],
+            getobjval(model))
 end
 
 mutable struct ProblemEvaluator <: AbstractNLPEvaluator

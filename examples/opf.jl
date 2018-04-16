@@ -48,7 +48,7 @@ gen_cost = pfnet.Function("generation cost", 1., net)
 # Constaints
 acpf = pfnet.Constraint("AC power balance", net)
 bounds = pfnet.Constraint("variable bounds", net)
-th_limits = pfnet.Constraint("linearized AC branch flow limits", net)
+th_limits = pfnet.Constraint("AC branch flow limits", net)
 
 # Problem
 problem = pfnet.Problem(net)
@@ -61,5 +61,7 @@ show_problem(problem)
 
 # Solve
 solver = IpoptSolver()
-solve(problem, solver)
+status, x, val = solve(problem, solver)
+
+# Update network
 
