@@ -27,10 +27,8 @@ function pfnet_vec_from_Array{T}(ar::Array{T,1})
                  size(ar)[1])
 end
 
-# SparseMatrixCSC
-function SparseMatrixCSC(mat::Ptr{Void}, own::Bool)
-    m = ccall((:MAT_get_size1, libpfnet), Int, (Ptr{Void},), mat)
-    n = ccall((:MAT_get_size2, libpfnet), Int, (Ptr{Void},), mat)
+# Matrix
+function SparseMatrixCOO(mat::Ptr{Void}, own::Bool)
     nnz = m = ccall((:MAT_get_nnz, libpfnet), Int, (Ptr{Void},), mat)
     I = unsafe_wrap(Array,
                     ccall((:MAT_get_row_array, libpfnet), Ptr{Int32}, (Ptr{Void},), mat),
@@ -47,6 +45,13 @@ function SparseMatrixCSC(mat::Ptr{Void}, own::Bool)
     if own
         Base.Libc.free(mat) # delete container
     end
+    return (I,J,V)
+end
+
+function SparseMatrixCSC(mat::Ptr{Void}, own::Bool)
+    m = ccall((:MAT_get_size1, libpfnet), Int, (Ptr{Void},), mat)
+    n = ccall((:MAT_get_size2, libpfnet), Int, (Ptr{Void},), mat)
+    I, J, V = SparseMatrixCOO(mat, own)
     return sparse(I, J, V, m, n)
 end
 
